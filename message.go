@@ -44,6 +44,16 @@ func NewMessage(topic string, body []byte) *Message {
 	}
 }
 
+func NewMessageWithTag(topic,tag string, body []byte) *Message {
+	properties := make(map[string]string)
+	properties["TAGS"] = tag
+	return &Message{
+		Topic:      topic,
+		Body:       body,
+		Properties: properties,
+	}
+}
+
 type MessageExt struct {
 	Message
 	QueueId       int32
@@ -154,12 +164,15 @@ func messageProperties2String(properties map[string]string) string {
 	StringBuilder := bytes.NewBuffer([]byte{})
 	if properties != nil && len(properties) != 0 {
 		for k, v := range properties {
-			binary.Write(StringBuilder, binary.BigEndian, k)                  // 4
-			binary.Write(StringBuilder, binary.BigEndian, NameValueSeparator) // 4
-			binary.Write(StringBuilder, binary.BigEndian, v)                  // 4
-			binary.Write(StringBuilder, binary.BigEndian, PropertySeparator)  // 4
+			fmt.Printf("Properties Key:%s, Value:%s\n", k, v)
+			binary.Write(StringBuilder, binary.BigEndian, []byte(k))                  // 4
+			binary.Write(StringBuilder, binary.BigEndian, int32(NameValueSeparator)) // 4
+			binary.Write(StringBuilder, binary.BigEndian, []byte(v))                  // 4
+			binary.Write(StringBuilder, binary.BigEndian, int32(PropertySeparator))  // 4
 		}
 	}
+	fmt.Printf("StringBuilder:%+v\n", StringBuilder)
+	fmt.Printf("Result:%s\n", StringBuilder.String())
 	return StringBuilder.String()
 }
 
