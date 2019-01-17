@@ -54,6 +54,18 @@ func NewMessageWithTag(topic,tag string, body []byte) *Message {
 	}
 }
 
+func NewMessageWithProperties(topic string, body []byte, properties map[string]string) *Message {
+	return &Message{
+		Topic:      topic,
+		Body:       body,
+		Properties: properties,
+	}
+}
+
+func GetMsg(properties map[string]string) string {
+	return messageProperties2String(properties)
+}
+
 type MessageExt struct {
 	Message
 	QueueId       int32
@@ -161,19 +173,34 @@ func decodeMessage(data []byte) []*MessageExt {
 }
 
 func messageProperties2String(properties map[string]string) string {
-	StringBuilder := bytes.NewBuffer([]byte{})
+	//StringBuilder := bytes.NewBuffer([]byte{})
+
+	byteSlice := []byte{}
 	if properties != nil && len(properties) != 0 {
 		for k, v := range properties {
 			fmt.Printf("Properties Key:%s, Value:%s\n", k, v)
-			binary.Write(StringBuilder, binary.BigEndian, []byte(k))                  // 4
-			binary.Write(StringBuilder, binary.BigEndian, int32(NameValueSeparator)) // 4
-			binary.Write(StringBuilder, binary.BigEndian, []byte(v))                  // 4
-			binary.Write(StringBuilder, binary.BigEndian, int32(PropertySeparator))  // 4
+			kSlice := []byte(k)
+			vSlice := []byte(v)
+			byteSlice = append(byteSlice, kSlice...)
+			byteSlice = append(byteSlice, NameValueSeparator)
+			byteSlice = append(byteSlice, vSlice...)
+			byteSlice = append(byteSlice, PropertySeparator)
+			//binary.Write(StringBuilder, binary.BigEndian, []byte(k))                  // 4
+			//binary.Write(StringBuilder, binary.BigEndian, NameValueSeparator) // 4
+			//binary.Write(StringBuilder, binary.BigEndian, []byte(v))                  // 4
+			//binary.Write(StringBuilder, binary.BigEndian, PropertySeparator)  // 4
 		}
 	}
-	fmt.Printf("StringBuilder:%+v\n", StringBuilder)
-	fmt.Printf("Result:%s\n", StringBuilder.String())
-	return StringBuilder.String()
+	fmt.Println(byteSlice)
+	fmt.Println(string(byteSlice))
+	//fmt.Printf("%q,len:%s\n",StringBuilder.String(), len(StringBuilder.String()))
+	//ba := []byte(StringBuilder.String())
+	//fmt.Println(len(ba))
+	//by := []byte{85, 78, 73, 81, 95, 75, 69, 89, 1, 67, 48, 65, 56, 50, 66, 56, 68, 54, 66, 66, 50, 51, 53, 53, 68, 65, 50, 53, 52, 53, 49, 50, 52, 67, 55, 48, 49, 48, 48, 48, 50, 2, 87, 65, 73, 84, 1, 116, 114, 117, 101, 2, 84, 65, 71, 83, 1, 84, 97, 103, 66, 2}
+	//fmt.Println(len(by))
+	//fmt.Println(string(by))
+
+	return string(byteSlice)
 }
 
 func (msg Message) checkMessage(producer *DefaultProducer) (err error) {

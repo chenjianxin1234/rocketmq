@@ -262,8 +262,10 @@ func (d *DefaultProducer) sendKernel(msg *Message, mq *MessageQueue, communicati
 		MessageClientIDSetter.setUniqID(msg)
 
 		sysFlag := 0
+		//msgBodyCompressed := false            //sli4
 		if d.tryToCompressMessage(msg) {
 			sysFlag |= CompressedFlag
+			//msgBodyCompressed = true          //sli4
 		}
 
 		tranMsg := msg.Properties[MessageConst.PropertyTransactionPrepared]
@@ -283,6 +285,7 @@ func (d *DefaultProducer) sendKernel(msg *Message, mq *MessageQueue, communicati
 		requestHeader.DefaultTopic = d.createTopicKey
 		requestHeader.DefaultTopicQueueNums = d.defaultTopicQueueNums
 		requestHeader.QueueId = mq.queueId
+		//requestHeader.BornTimestamp =
 		requestHeader.SysFlag = sysFlag
 		requestHeader.Properties = messageProperties2String(msg.Properties)
 		requestHeader.ReconsumeTimes = 0

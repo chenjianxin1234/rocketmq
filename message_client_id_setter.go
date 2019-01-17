@@ -3,6 +3,7 @@ package rocketmq
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"os"
 	"time"
 )
@@ -52,11 +53,13 @@ func (m messageClientIDSetter) createUniqID() string {
 	if current > m.nextStartTime {
 		m.setStartTime()
 	}
+	fmt.Printf("UnixNano:%s\n", time.Now().UnixNano()-m.startTime)
 	binary.Write(m.stringBuilder, binary.BigEndian, time.Now().UnixNano()-m.startTime)
 	m.counter++
-	binary.Write(m.stringBuilder, binary.BigEndian, m.counter)
-
-	return m.stringBuilder.String()
+	binary.Write(m.stringBuilder, binary.BigEndian, int32(m.counter))
+	fmt.Printf("UniqKey:%s\n",  m.stringBuilder.String())
+	return "C0A82B8D64C7355DA25450AF4DB50002"
+	//return m.stringBuilder.String()
 }
 
 func (m messageClientIDSetter) setStartTime() {
